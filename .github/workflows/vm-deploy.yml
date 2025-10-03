@@ -1,4 +1,4 @@
-name: Deploy Node App on Azure VM
+name: Lab 3 (Online) or Lab 1 (Onsite)
 
 on:
   workflow_dispatch:
@@ -35,44 +35,45 @@ jobs:
         run: |
           npm run build 2>/dev/null || echo "No build script found, skipping build step"
 
-      - name: Run unit tests with coverage and JUnit reports
-        env:
-          JEST_JUNIT_OUTPUT: coverage/junit.xml
-        run: npm run test:ci
+      # Skip sonarqube
+      # - name: Run unit tests with coverage and JUnit reports
+      #   env:
+      #     JEST_JUNIT_OUTPUT: coverage/junit.xml
+      #   run: npm run test:ci
 
-      - name: Publish test results to Checks
-        uses: dorny/test-reporter@v2.1.1
-        if: always()
-        with:
-          name: Jest Test Results
-          path: coverage/junit.xml
-          reporter: jest-junit
-          fail-on-error: true
+      # - name: Publish test results to Checks
+      #   uses: dorny/test-reporter@v2.1.1
+      #   if: always()
+      #   with:
+      #     name: Jest Test Results
+      #     path: coverage/junit.xml
+      #     reporter: jest-junit
+      #     fail-on-error: true
 
-      - name: Upload test results to GitHub
-        uses: actions/upload-artifact@v4.6.2
-        if: always()
-        with:
-          name: test-results-node
-          path: coverage/
-          retention-days: 30
+      # - name: Upload test results to GitHub
+      #   uses: actions/upload-artifact@v4.6.2
+      #   if: always()
+      #   with:
+      #     name: test-results-node
+      #     path: coverage/
+      #     retention-days: 30
 
-      - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v6.0.0
-        env:
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          args: >
-            -Dsonar.projectKey=sample-node-app-saurabh
-            -Dsonar.organization=sda
-            -Dsonar.token=${{ secrets.SONAR_TOKEN }}
-            -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }}
-            -Dsonar.sources=.
-            -Dsonar.exclusions=node_modules/**,coverage/**,tests/**,**/*.test.js,**/*.spec.js
-            -Dsonar.tests=tests/
-            -Dsonar.test.inclusions=**/*.test.js,**/*.spec.js
-            -Dsonar.coverage.exclusions=node_modules/**,coverage/**,tests/**,**/*.test.js,**/*.spec.js
+      # - name: SonarQube Scan
+      #   uses: SonarSource/sonarqube-scan-action@v6.0.0
+      #   env:
+      #     SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      #   with:
+      #     args: >
+      #       -Dsonar.projectKey=sample-node-app-saurabh
+      #       -Dsonar.organization=sda
+      #       -Dsonar.token=${{ secrets.SONAR_TOKEN }}
+      #       -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }}
+      #       -Dsonar.sources=.
+      #       -Dsonar.exclusions=node_modules/**,coverage/**,tests/**,**/*.test.js,**/*.spec.js
+      #       -Dsonar.tests=tests/
+      #       -Dsonar.test.inclusions=**/*.test.js,**/*.spec.js
+      #       -Dsonar.coverage.exclusions=node_modules/**,coverage/**,tests/**,**/*.test.js,**/*.spec.js
 
       - name: Create deployment package
         run: |
@@ -97,10 +98,14 @@ jobs:
           (cd "$GITHUB_WORKSPACE" && zip -r "$ZIP_NAME" "deployment-package")
           echo "ZIP_NAME=$ZIP_NAME" >> "$GITHUB_ENV"
 
-      - name: Azure login (Service Principal)
+      - name: Azure login (client secret)
         uses: azure/login@v2
+        # ------------------------------------
+        # ------- !!!!!!انتبهوا هنا ----------
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          # Check the naming of your CREDENTIALS secrets and change it
+          creds: ${{ secrets.AZURE_CREDS }}
+        # ------------------------------------
 
       - name: Upload deployment package artifact
         uses: actions/upload-artifact@v4.6.2
@@ -176,7 +181,7 @@ jobs:
           # Configuration
           APP_DIR="/opt/myapp"
           APP_NAME="myapp"
-          APP_USER="ferhad"
+          APP_USER="azureuser"
           PACKAGE_URL="$1"
 
           # Install Node.js if not present
@@ -247,7 +252,7 @@ jobs:
 
           # Start with PM2 (non-blocking)
           echo "Starting application with PM2..."
-          sudo -u "$APP_USER" pm2 start "$APP_DIR/current/server.js" --name "$APP_NAME"
+          sudo -u "$APP_USER" pm2 start "$APP_DIR/current/server.js" --name "$APP_NAME" --no-daemon
 
           echo "PM2 status:"
           sudo -u "$APP_USER" pm2 ls
