@@ -176,7 +176,7 @@ jobs:
           # Configuration
           APP_DIR="/opt/myapp"
           APP_NAME="myapp"
-          APP_USER="ferhad"
+          APP_USER="azureuser"
           PACKAGE_URL="$1"
 
           # Install Node.js if not present
