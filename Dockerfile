@@ -23,24 +23,25 @@
 # CMD ["npm", "start"]
 
 # <---week4 lab4 dockerfile --->
-# Use official Node image
+# Define a base layer
 FROM node:22-alpine
 
-# Set working directory
+LABEL author=saurabh
+
+# Set the working directory
 WORKDIR /app
 
-# Copy package files and install dependencies
+# Copy the package.json and package-lock.json files
 COPY package*.json ./
-RUN npm ci
 
-# Copy rest of the app source
+# Install dependencies
+RUN npm install
+
+# Copy the rest of the application code
 COPY . .
 
-# Build step if needed (optional)
-# RUN npm run build
+# Expose the application port
+EXPOSE 3000
 
-# Expose the port your app listens on
-EXPOSE 8080
-
-# Start the app
+# Start the application
 CMD ["npm", "start"]
