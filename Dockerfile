@@ -25,16 +25,21 @@
 # <---week4 lab4 dockerfile --->
 # Define a base layer
 # Build step
-FROM node:18-alpine AS build
+# Use Node.js base image
+FROM node:18-alpine
+
+# Set working directory
 WORKDIR /app
+
+# Copy package files and install dependencies
 COPY package*.json ./
 RUN npm install
+
+# Copy the rest of the app
 COPY . .
-RUN npm run build
 
-# Serve step
-FROM nginx:alpine
-COPY --from=build /app/build /usr/share/nginx/html
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+# Expose the port your app runs on
+EXPOSE 3000
 
+# Start the app
+CMD ["npm", "start"]
