@@ -23,19 +23,24 @@
 # CMD ["npm", "start"]
 
 # <---week4 lab4 dockerfile --->
-# 1. Build stage
-FROM node:22-alpine AS build
+# Use official Node image
+FROM node:22-alpine
+
+# Set working directory
 WORKDIR /app
+
+# Copy package files and install dependencies
 COPY package*.json ./
 RUN npm ci
-COPY . .
-# If you have a build step (e.g., React/Next client): npm run build || true
-RUN npm run build || true
 
-# 2. Runtime stage
-FROM node:22-alpine
-WORKDIR /app
-ENV NODE_ENV=production
-COPY --from=build /app ./
-EXPOSE 3000
+# Copy rest of the app source
+COPY . .
+
+# Build step if needed (optional)
+# RUN npm run build
+
+# Expose the port your app listens on
+EXPOSE 8080
+
+# Start the app
 CMD ["npm", "start"]
