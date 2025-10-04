@@ -50,6 +50,8 @@ jobs:
           # Uncomment if your Dockerfile isn't at repo root
           # dockerfilePath: ./Dockerfile
           # target: <multi-stage-target-name-if-any>
+          buildArguments: |
+            --no-cache
 
           registryUrl: docker.io
           registryUsername: ${{ secrets.DOCKERHUB_USERNAME }}
