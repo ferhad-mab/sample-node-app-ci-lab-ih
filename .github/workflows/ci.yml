@@ -48,7 +48,7 @@ jobs:
         with:
           appSourcePath: ${{ github.workspace }}
           # Uncomment if your Dockerfile isn't at repo root
-          # dockerfilePath: ./Dockerfile
+          dockerfilePath: ./Dockerfile
           # target: <multi-stage-target-name-if-any>
 
           registryUrl: docker.io
